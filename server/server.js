@@ -1,48 +1,29 @@
-var mongoose = require('mongoose');
-var d;
-mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/MailApp');
+var express = require('express');
+var bodyParser = require('body-parser');
 
-var Mail = mongoose.model('Mail',{
-  from:{
-    type: String,
-    lowercase: true,
-    required: [true, "can't be blank"],
-    match: [/\S+@\S+\.\S+/, 'is invalid'],
-    trim: true
+var {mongoose} = require('./db/mongoose');
+var {User} = require('./models/user');
+var {Mail} = require('./models/mail');
 
-  },
-  to:{
-    type: String,
-    lowercase: true,
-    required: [true, "can't be blank"],
-    match: [/\S+@\S+\.\S+/, 'is invalid'],
-    trim: true,
-  },
-  subject:{
-    type: String
-  },
-  body: {
-    type: String,
-    required: [true, "can't be blank"],
-    minlength: 1,
-    trim: true
-  },
-  sentAt:{
-    type: Number
-  }
+var app = express();
+
+app.use(bodyParser.json());
+
+app.post('/mails', (req,res) => {
+  var mail = new Mail({
+    to: req.body.to,
+    subject: req.body.subject,
+    body: req.body.body,
+
+  });
+
+  mail.save().then((doc) => {
+      res.send(doc);
+    }, (e) => {
+      res.status(400).send(e);
+  });
 });
 
-var newMail = new Mail({
-  from:'ay@ayush.com',
-  to: 'gh',
-  subject: 'asdlkalsd',
-  body:'dad asd as d'
-
-});
-
-newMail.save().then((doc) => {
-  console.log('Sent mail', doc);
-}, (e) => {
-  console.log('unable to send mail');
+app.listen(3000, () => {
+  console.log('Started on port 3000');
 });
