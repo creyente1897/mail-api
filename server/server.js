@@ -24,13 +24,13 @@ app.post('/mails', (req,res) => {
   });
 });
 
-// app.get('/mails', (req,res) => {
-//   Mail.find().then((mails) => {
-//     res.send({mails});
-//   }, (e) => {
-//     res.status(400).send(e);
-//   })
-// });
+app.get('/mails', (req,res) => {
+  Mail.find().then((mails) => {
+    res.send({mails});
+  }, (e) => {
+    res.status(400).send(e);
+  })
+});
 app.listen(3000, () => {
   console.log('Started on port 3000');
 });
