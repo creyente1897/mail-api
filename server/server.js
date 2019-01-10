@@ -51,6 +51,24 @@ app.get('/mails/:id', (req,res) => {
   });
 });
 
+app.delete('/mails/:id', (req,res) => {
+  var id = req.params.id;
+
+  if(!ObjectID.isValid(id)){
+      return res.status(404).send();
+  }
+
+  Mail.findByIdAndDelete(id).then((mail) => {
+    if(!mail){
+      return res.status(404).send();
+    }
+
+    res.send({mail});
+  }).catch((e) => {
+    res.status(404).send();
+  });
+});
+
 app.listen(3000, () => {
   console.log('Started on port 3000');
 });
