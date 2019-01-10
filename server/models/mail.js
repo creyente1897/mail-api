@@ -15,7 +15,7 @@ var Mail = mongoose.model('Mail',{
   },
   sentAt:{
     type: Number,
-    default: null
+    default: new Date().getTime()
   }
 });
 

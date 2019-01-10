@@ -1,6 +1,7 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 var {mongoose} = require('./db/mongoose');
 var {User} = require('./models/user');
@@ -64,6 +65,26 @@ app.delete('/mails/:id', (req,res) => {
     }
 
     res.send({mail});
+  }).catch((e) => {
+    res.status(404).send();
+  });
+});
+
+app.patch('/mails/:id',(req,res) => {
+  var id = req.params.id;
+  var body = _.pick(req.body, ['to', 'subject', 'body']);
+
+  if(!ObjectID.isValid(id)){
+      return res.status(404).send();
+  }
+
+  Mail.findOneAndUpdate(id, {$set: body}, {new: true}).then((mail) => {
+    if(!mail){
+      return res.status(404).send();
+    }else{
+      mail.body.sentAt = new Date().getTime();
+      res.send({mail});
+    }
   }).catch((e) => {
     res.status(404).send();
   });
