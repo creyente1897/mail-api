@@ -1,9 +1,18 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 var Mail = mongoose.model('Mail',{
   to:{
     type: String,
-    required: true,
+    lowercase: true,
+    required: [true, "can't be blank"],
+    trim: true,
+    minlength: 1,
+    unique: true,
+    validate:{
+      validator: validator.isEmail,
+      message: '{VALUE} is not a valid email'
+    }
   },
   subject:{
     type: String
