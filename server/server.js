@@ -12,12 +12,12 @@ var app = express();
 
 app.use(bodyParser.json());
 
-app.post('/mails', (req,res) => {
+app.post('/mails',authenticate, (req,res) => {
   var mail = new Mail({
     to: req.body.to,
     subject: req.body.subject,
     body: req.body.body,
-
+    _creator: req.user._id
   });
 
   mail.save().then((doc) => {
@@ -27,22 +27,27 @@ app.post('/mails', (req,res) => {
   });
 });
 
-app.get('/mails', (req,res) => {
-  Mail.find().then((mails) => {
+app.get('/mails',authenticate, (req,res) => {
+  Mail.find({
+    _creator: req.user._id
+  }).then((mails) => {
     res.send({mails});
   }, (e) => {
     res.status(400).send(e);
   });
 });
 
-app.get('/mails/:id', (req,res) => {
+app.get('/mails/:id',authenticate, (req,res) => {
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
     return res.status(404).send();
   }
 
-  Mail.findById(id).then((mail) =>{
+  Mail.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((mail) =>{
     if(!mail){
       return res.status(404).send();
     }
@@ -53,14 +58,17 @@ app.get('/mails/:id', (req,res) => {
   });
 });
 
-app.delete('/mails/:id', (req,res) => {
+app.delete('/mails/:id', authenticate, (req,res) => {
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
       return res.status(404).send();
   }
 
-  Mail.findByIdAndDelete(id).then((mail) => {
+  Mail.findOneAndDelete({
+    _id: id,
+    _creator: req.user._id
+  }).then((mail) => {
     if(!mail){
       return res.status(404).send();
     }
@@ -71,7 +79,7 @@ app.delete('/mails/:id', (req,res) => {
   });
 });
 
-app.patch('/mails/:id',(req,res) => {
+app.patch('/mails/:id', authenticate, (req,res) => {
   var id = req.params.id;
   var body = _.pick(req.body, ['to', 'subject', 'body']);
 
@@ -79,7 +87,7 @@ app.patch('/mails/:id',(req,res) => {
       return res.status(404).send();
   }
 
-  Mail.findOneAndUpdate(id, {$set: body}, {new: true}).then((mail) => {
+  Mail.findOneAndUpdate({_id: id, _creator: req.user._id}, {$set: body}, {new: true}).then((mail) => {
     if(!mail){
       return res.status(404).send();
     }else{

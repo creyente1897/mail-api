@@ -25,6 +25,10 @@ var Mail = mongoose.model('Mail',{
   sentAt:{
     type: Number,
     default: new Date().getTime()
+  },
+  _creator: {
+    type: mongoose.Schema.Types.ObjectId,
+    required:true
   }
 });
 
